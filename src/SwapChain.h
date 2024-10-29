@@ -17,6 +17,7 @@ public:
     VkSemaphore GetImageAvailableVkSemaphore() const;
     VkSemaphore GetRenderFinishedVkSemaphore() const;
     
+    //test
     void Recreate();
     bool Acquire();
     bool Present();
