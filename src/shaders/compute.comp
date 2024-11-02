@@ -36,14 +36,32 @@ struct Blade {
 // 	  uint firstInstance; // = 0
 // } numBlades;
 
+
+layout(set = 2, binding = 0) buffer InputBlades { //real name
+    Blade blades[];
+} inputBlades; //instance name
+
+layout(set = 2, binding = 1) buffer CulledBlades {
+    Blade blades[];
+} culledBlades;
+
+layout(set = 2, binding = 2) buffer NumBlades {
+ 	  uint vertexCount;   // Write the number of blades remaining here
+ 	  uint instanceCount; // = 1
+ 	  uint firstVertex;   // = 0
+ 	  uint firstInstance; // = 0
+} numBlades;
+
+
 bool inBounds(float value, float bounds) {
     return (value >= -bounds) && (value <= bounds);
 }
 
 void main() {
+
 	// Reset the number of blades to 0
 	if (gl_GlobalInvocationID.x == 0) {
-		// numBlades.vertexCount = 0;
+		numBlades.vertexCount = 0;
 	}
 	barrier(); // Wait till all threads reach this point
 
@@ -53,4 +71,11 @@ void main() {
 	// to the culled blades buffer
 	// Note: to do this, you will need to use an atomic operation to read and update numBlades.vertexCount
 	// You want to write the visible blades to the buffer without write conflicts between threads
+
+//No culling
+    uint blade_idx = gl_GlobalInvocationID.x;
+    Blade curBlade = inputBlades.blades[blade_idx];
+
+    uint culled_idx = atomicAdd(numBlades.vertexCount, 1);
+    culledBlades.blades[culled_idx] = curBlade;
 }
